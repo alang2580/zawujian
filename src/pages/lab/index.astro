@@ -1,0 +1,117 @@
+---
+/**
+ * 车间列表页
+ * 放我自己做的小工具与创意网页。
+ */
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const items = (await getCollection('lab', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime()
+);
+---
+
+<Base title="车间" description="自己写的小工具和小网页，能直接用的那种。">
+  <header class="page-head">
+    <div class="wrap">
+      <span class="tag">车间 / Workshop</span>
+      <h1>自己做的东西</h1>
+      <p>不摆概念，只放能点开用的。每一个都能直接跑，不是截图。</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="wrap">
+      {
+        items.length > 0 ? (
+          <div class="works">
+            {items.map((item) => (
+              <a class="work" href={`/lab/${item.id}`}>
+                <div class="work__no">NO.{item.data.no}</div>
+                <h2 class="work__name">{item.data.title}</h2>
+                <p class="work__desc">{item.data.summary}</p>
+                <div class="work__foot">
+                  <span>{item.data.tech}</span>
+                  <span class="arrow">→</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="empty-box">
+            <p>第一个工具还在做。</p>
+            <span class="tag">做好之后会出现在这里，不摆空壳</span>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .works {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .work {
+    border: 1.5px solid var(--ink);
+    padding: 28px 26px 26px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s, background 0.25s, color 0.25s, border-color 0.25s;
+  }
+  .work:hover {
+    transform: translateY(-6px);
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .work__no {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .work__name {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .work__desc {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    flex: 1;
+  }
+  .work:hover .work__desc { color: rgba(242, 239, 230, 0.66); }
+  .work__foot {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+  }
+  .work:hover .work__foot { color: rgba(242, 239, 230, 0.5); }
+  .work__foot .arrow { transition: transform 0.25s, color 0.25s; }
+  .work:hover .arrow { transform: translateX(6px); color: var(--accent); }
+
+  .empty-box {
+    border: 1px dashed rgba(18, 16, 14, 0.28);
+    padding: 40px 26px;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  .empty-box .tag { display: block; margin-top: 8px; }
+
+  @media (max-width: 900px) {
+    .works { grid-template-columns: 1fr; }
+  }
+</style>

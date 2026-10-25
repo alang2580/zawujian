@@ -1,0 +1,81 @@
+---
+/**
+ * 顶部滚动条
+ * 模仿报纸刊头下方的资讯带，用一句话交代站点的收录原则。
+ * 数字是实时查集合算出来的，不是写死的。
+ */
+import { getCollection } from 'astro:content';
+
+const tools = await getCollection('tools', ({ data }) => !data.draft);
+const notes = await getCollection('notes', ({ data }) => !data.draft);
+
+const phrases = [
+  `本站共 ${tools.length} 条藏品`,
+  `另有 ${notes.length} 篇笔记`,
+  '每条推荐都写了坑在哪',
+  '工具至少用满三个月才会写',
+  '不收自己没用过的东西',
+];
+---
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <!-- 文案复制两份，位移 -50% 时正好接上，形成无缝循环 -->
+    {[0, 1].map(() => (
+      <span>
+        {phrases.map((p) => (
+          <i>{p}</i>
+        ))}
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .ticker {
+    background: var(--ink);
+    color: var(--paper);
+    height: 34px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .ticker__track {
+    display: flex;
+    gap: 42px;
+    white-space: nowrap;
+    animation: run 40s linear infinite;
+    padding-left: 42px;
+  }
+  .ticker__track span {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+  }
+  /* 每个短语后面跟一个朱红小圆点，作为分隔符 */
+  .ticker__track i {
+    font-style: normal;
+    display: inline-flex;
+    align-items: center;
+  }
+  .ticker__track i::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    /* 圆点紧贴文字，不能靠父级 gap 拉开，否则会变成「下一句的句首符号」 */
+    margin-left: 14px;
+    flex: none;
+  }
+  @keyframes run {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track { animation: none; }
+  }
+</style>

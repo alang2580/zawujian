@@ -1,0 +1,356 @@
+---
+/**
+ * 首页
+ * 结构：主视觉 → 最新三条（藏品/车间/笔记混排）→ 车间区块 → 数字条
+ * 内容全部来自 src/content/ 下的 Markdown，没有硬编码条目。
+ */
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostCard from '../components/PostCard.astro';
+import { SITE } from '../consts';
+
+const tools = await getCollection('tools', ({ data }) => !data.draft);
+const notes = await getCollection('notes', ({ data }) => !data.draft);
+const lab = await getCollection('lab', ({ data }) => !data.draft);
+
+/** 把日期格式化成 2026.10.15 */
+const fmt = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+
+// 三类内容混排成一条时间流，取最新的三条
+const feed = [
+  ...tools.map((t) => ({
+    href: `/tools/${t.id}`,
+    category: '工具',
+    tone: 'accent' as const,
+    title: t.data.title,
+    summary: t.data.summary,
+    date: t.data.publishedAt,
+    meta: `${fmt(t.data.publishedAt)} · 评分 ${t.data.score}`,
+  })),
+  ...lab.map((l) => ({
+    href: `/lab/${l.id}`,
+    category: '车间',
+    tone: 'blue' as const,
+    title: l.data.title,
+    summary: l.data.summary,
+    date: l.data.publishedAt,
+    meta: `${fmt(l.data.publishedAt)} · ${l.data.tech}`,
+  })),
+  ...notes.map((n) => ({
+    href: `/notes/${n.id}`,
+    category: '笔记',
+    tone: 'ink' as const,
+    title: n.data.title,
+    summary: n.data.summary,
+    date: n.data.publishedAt,
+    meta: `${fmt(n.data.publishedAt)} · 阅读`,
+  })),
+]
+  .sort((a, b) => b.date.getTime() - a.date.getTime())
+  .slice(0, 3);
+
+const thisMonth = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+---
+
+<Base>
+  <!-- ===== 主视觉 ===== -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero__top">
+        <span class="tag">前言 / Preface</span>
+        <span class="tag">第 {SITE.issue} 期 · {thisMonth}</span>
+      </div>
+
+      <h1 class="rise">
+        用过三个月，<br />才敢<span class="under">写下来</span>。
+      </h1>
+
+      <div class="hero__bottom rise">
+        <p class="lede">{SITE.description}</p>
+        <div class="stamp">
+          <div class="stamp__num">{tools.length}</div>
+          <div class="stamp__label">条藏品 / 全都亲手用过</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== 最新 ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head rise">
+        <h2 class="section__title">最新</h2>
+        <a class="section__more" href="/tools">全部藏品 →</a>
+      </div>
+
+      {feed.length > 0 ? (
+        <div class="feed">
+          {feed.map((item) => (
+            <PostCard
+              href={item.href}
+              category={item.category}
+              tone={item.tone}
+              title={item.title}
+              summary={item.summary}
+              meta={item.meta}
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">还没有内容。往 <code>src/content/</code> 里放一个 Markdown 文件就会出现。</p>
+      )}
+    </div>
+  </section>
+
+  <!-- ===== 车间（反色区块） ===== -->
+  <section class="workshop">
+    <div class="wrap">
+      <div class="section__head rise">
+        <div>
+          <span class="tag">车间 / Workshop</span>
+          <h2 class="section__title workshop__title">自己做的东西</h2>
+        </div>
+        <a class="section__more workshop__more" href="/lab">全部作品 →</a>
+      </div>
+
+      {lab.length > 0 ? (
+        <div class="cards">
+          {lab.map((item) => (
+            <a class="card rise" href={`/lab/${item.id}`}>
+              <div>
+                <div class="card__no">NO.{item.data.no}</div>
+                <div class="card__name">{item.data.title}</div>
+                <p class="card__desc">{item.data.summary}</p>
+              </div>
+              <div class="card__foot">
+                <span>{item.data.tech}</span>
+                <span class="arrow">→</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="workshop__empty">
+          <p>第一个工具还在做。</p>
+          <p class="tag">做好之后会出现在这里，而不是先摆一个空壳</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- ===== 数字条 ===== -->
+  <div class="wrap figures-wrap">
+    <div class="figures rise">
+      <div class="figure">
+        <div class="figure__num">{tools.length}</div>
+        <div class="figure__label">条藏品</div>
+      </div>
+      <div class="figure">
+        <div class="figure__num">{lab.length}</div>
+        <div class="figure__label">个自制工具</div>
+      </div>
+      <div class="figure">
+        <div class="figure__num">{notes.length}</div>
+        <div class="figure__label">篇笔记</div>
+      </div>
+      <div class="figure">
+        <div class="figure__num">{tools.length + notes.length + lab.length}</div>
+        <div class="figure__label">条全部内容</div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* ---------- 主视觉 ---------- */
+  .hero { padding: 72px 0 56px; border-bottom: var(--line); }
+  .hero__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: var(--line);
+    padding-bottom: 14px;
+    margin-bottom: 34px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(46px, 7.2vw, 104px);
+    /* 中文没有西文那样的上下伸部，行高低于 1 会让两行字粘在一起 */
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+    margin-bottom: 44px;
+  }
+  .hero h1 .under {
+    /* 马克笔式的下划线，只覆盖文字底部一小条 */
+    background: linear-gradient(transparent 86%, rgba(226, 62, 31, 0.3) 86%);
+  }
+  .hero__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+  .lede {
+    font-size: 18px;
+    line-height: 1.75;
+    max-width: 480px;
+    color: var(--ink-soft);
+  }
+  .stamp {
+    background: var(--accent);
+    color: #fff;
+    padding: 18px 22px;
+    min-width: 210px;
+    transform: rotate(-1.5deg);
+  }
+  .stamp__num {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .stamp__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    margin-top: 6px;
+    opacity: 0.92;
+  }
+
+  /* ---------- 最新三条 ---------- */
+  .feed {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* 第二格整体下移，制造杂志内页的参差节奏 */
+  .feed :global(.post:nth-child(2)) { margin-top: 54px; }
+  .feed :global(.post:first-child) { border-left: none; padding-left: 0; }
+
+  .empty {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 20px 0;
+  }
+  .empty code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--paper-2);
+    padding: 1px 5px;
+  }
+
+  /* ---------- 车间 ---------- */
+  .workshop {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 72px 0 80px;
+  }
+  .workshop :global(.tag) { color: rgba(242, 239, 230, 0.5); }
+  .workshop__title { color: var(--paper); margin-top: 10px; }
+  .workshop__more { border-color: var(--paper); color: var(--paper); }
+  .workshop__more:hover { color: var(--accent); border-color: var(--accent); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .card {
+    border: 1px solid rgba(242, 239, 230, 0.22);
+    padding: 28px 26px 26px;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s, background 0.25s, border-color 0.25s;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    background: rgba(242, 239, 230, 0.06);
+    border-color: var(--accent);
+  }
+  .card__no {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .card__name {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .card__desc {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: rgba(242, 239, 230, 0.62);
+  }
+  .card__foot {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(242, 239, 230, 0.5);
+  }
+  .card__foot .arrow { transition: transform 0.25s, color 0.25s; }
+  .card:hover .card__foot .arrow { transform: translateX(6px); color: var(--accent); }
+
+  .workshop__empty {
+    border: 1px dashed rgba(242, 239, 230, 0.28);
+    padding: 40px 26px;
+    color: rgba(242, 239, 230, 0.7);
+    font-size: 15px;
+  }
+  .workshop__empty .tag { margin-top: 8px; display: block; }
+
+  /* ---------- 数字条 ---------- */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: var(--line);
+    margin-top: 12px;
+  }
+  .figures-wrap { padding-bottom: 72px; }
+  .figure { padding: 40px 26px; border-left: var(--line); }
+  .figure:first-child { border-left: none; padding-left: 0; }
+  .figure__num {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 4.6vw, 62px);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+  .figure__label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* ---------- 窄屏 ---------- */
+  @media (max-width: 900px) {
+    .hero { padding: 44px 0 40px; }
+    .hero h1 { font-size: clamp(30px, 8.2vw, 50px); margin-bottom: 32px; }
+    .hero__bottom { gap: 28px; }
+    .stamp { transform: none; }
+    .feed { grid-template-columns: 1fr; }
+    .feed :global(.post:nth-child(2)) { margin-top: 0; }
+    .cards { grid-template-columns: 1fr; }
+    .figures { grid-template-columns: repeat(2, 1fr); }
+    .figure { border-left: none; border-top: var(--line); padding-left: 0; }
+    .figures-wrap { padding-bottom: 48px; }
+    .workshop { padding: 48px 0 56px; }
+  }
+</style>

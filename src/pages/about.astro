@@ -1,0 +1,61 @@
+---
+/**
+ * 关于页
+ * 这一页必须是你自己写的 —— 下面是骨架，括号里的内容请替换成真实信息。
+ */
+import Base from '../layouts/Base.astro';
+import { SITE } from '../consts';
+---
+
+<Base title="关于" description={`关于 ${SITE.name}，以及这个站在做什么。`}>
+  <header class="page-head">
+    <div class="wrap">
+      <span class="tag">关于 / About</span>
+      <h1>这个站做什么</h1>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="prose body">
+      <p>
+        我是一个（在这里写你的身份，例如：在某某行业做了几年什么工作的普通人）。
+        这个站是我放东西的地方，一共三块：
+      </p>
+
+      <h2>藏品</h2>
+      <p>
+        我用过并留下来的工具。每条都会写清楚：它解决什么问题、我用了多久、坑在哪、
+        什么情况下你不该用它、替代品是谁。缺一件我就不写。
+      </p>
+
+      <h2>车间</h2>
+      <p>
+        我自己写的小工具和小网页。这里的东西都能直接点开用，不放截图和概念。
+      </p>
+
+      <h2>笔记</h2>
+      <p>比推荐更长的东西：一次完整的踩坑复盘、一个想法的推演、一年的总结。</p>
+
+      <h2>为什么写这些</h2>
+      <p>
+        （这一节建议你自己写两句真实理由。比如：因为被别人的判断救过很多次，
+        所以想把自己验证过的判断也留下来。）
+      </p>
+
+      <h2>怎么找我</h2>
+      <p>
+        邮箱：<a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+      <p>
+        有想让我试的工具、发现了文中的错误、或者想聊点什么，都可以直接发邮件。
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .body {
+    max-width: 680px;
+    padding: 44px 0 72px;
+  }
+</style>

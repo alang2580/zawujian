@@ -1,0 +1,17 @@
+{
+  "name": "zawujian",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "杂物间 — 个人网站：工具推荐、自制工具与笔记",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "new": "node scripts/new-content.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "astro": "^7.4.0"
+  }
+}

@@ -1,0 +1,175 @@
+---
+/**
+ * 车间作品页
+ * 有 demoUrl 时给出「直接打开」按钮，没有就只展示说明和源码。
+ */
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Comments from '../../components/Comments.astro';
+
+export async function getStaticPaths() {
+  const items = await getCollection('lab', ({ data }) => !data.draft);
+  return items.map((item) => ({
+    params: { slug: item.id },
+    props: { item },
+  }));
+}
+
+interface Props {
+  item: CollectionEntry<'lab'>;
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+const { demoUrl, repoUrl, tech, no, publishedAt, embedUrl, embedHeight } = item.data;
+
+const fmt = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+---
+
+<Base title={item.data.title} description={item.data.summary}>
+  <article>
+    <header class="head">
+      <div class="wrap">
+        <div class="head__top">
+          <span class="tag">NO.{no} / Workshop</span>
+          <span class="tag">{fmt(publishedAt)}</span>
+        </div>
+        <h1>{item.data.title}</h1>
+        <p class="head__summary">{item.data.summary}</p>
+
+        <div class="actions">
+          {demoUrl && (
+            <a class="btn btn--solid" href={demoUrl} target="_blank" rel="noopener">
+              直接打开 →
+            </a>
+          )}
+          {repoUrl && (
+            <a class="btn" href={repoUrl} target="_blank" rel="noopener">
+              看源码
+            </a>
+          )}
+          <span class="tech">{tech}</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      {
+        embedUrl && (
+          <section class="embed">
+            <div class="embed__bar">
+              <span class="tag">在线运行 / Live</span>
+              <a class="embed__open" href={embedUrl} target="_blank" rel="noopener">
+                全屏打开 ↗
+              </a>
+            </div>
+            <iframe
+              src={embedUrl}
+              title={item.data.title}
+              loading="lazy"
+              style={`height:${embedHeight ?? '820px'}`}
+            />
+          </section>
+        )
+      }
+
+      <div class="prose body">
+        <Content />
+      </div>
+      <Comments />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .head {
+    padding: 52px 0 34px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .head__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 22px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .head h1 {
+    font-family: var(--font-display);
+    font-size: clamp(34px, 5.4vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+  }
+  .head__summary {
+    margin-top: 18px;
+    font-size: 18px;
+    line-height: 1.72;
+    color: var(--ink-soft);
+    max-width: 640px;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    border: 1.5px solid var(--ink);
+    padding: 11px 20px;
+    transition: background 0.18s, color 0.18s;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn--solid { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn--solid:hover { background: var(--ink); border-color: var(--ink); }
+  .tech {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  /* ---------- 内嵌运行区 ---------- */
+  .embed {
+    margin-top: 40px;
+    border: 1.5px solid var(--ink);
+  }
+  .embed__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    border-bottom: 1.5px solid var(--ink);
+    background: var(--paper-2);
+  }
+  .embed__open {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 1px;
+    white-space: nowrap;
+  }
+  .embed__open:hover { color: var(--accent); border-color: var(--accent); }
+  .embed iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: #fff;
+  }
+
+  .body { max-width: 720px; padding-top: 44px; }
+
+  @media (max-width: 900px) {
+    .head { padding: 32px 0 24px; }
+    .head__summary { font-size: 16px; }
+    .body { padding-top: 30px; }
+  }
+</style>

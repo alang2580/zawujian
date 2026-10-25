@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>杂物间 PARTS BIN — 个人网站首页设计稿</title>
+<style>
+  /* ============================================================
+     配色变量
+     杂志撞色的核心是「大面积纸色 + 一块高饱和色 + 粗黑线条」，
+     彩色不要铺满页面，只在关键位置点一下，冲击力才出得来。
+     ============================================================ */
+  :root {
+    --paper:    #F2EFE6;  /* 纸色：偏暖的米白，比纯白有质感 */
+    --paper-2:  #E8E4D8;  /* 次级纸色：卡片底色 */
+    --ink:      #12100E;  /* 墨色：不用纯黑，纯黑在屏幕上发死 */
+    --ink-soft: #4A453C;  /* 次级文字 */
+    --muted:    #8A8478;  /* 弱化文字：编号、日期这类 */
+    --accent:   #E23E1F;  /* 撞色主色：朱红 */
+    --accent-2: #1B36D6;  /* 撞色辅色：电蓝，只用一两次 */
+
+    /* 三种字体分工：标题用无衬线特粗，正文用衬线，标签用等宽 */
+    --font-display: "Helvetica Neue", "Segoe UI", "Microsoft YaHei", sans-serif;
+    --font-serif: Georgia, "Songti SC", "SimSun", "STSong", serif;
+    --font-mono: "SF Mono", "Cascadia Mono", Consolas, "Courier New", monospace;
+
+    --line: 1px solid rgba(18, 16, 14, 0.16);
+    --gutter: 44px;      /* 页面左右留白 */
+    --max: 1320px;       /* 内容最大宽度 */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-serif);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: none; }
+
+  /* 页面内容统一限宽居中 */
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  /* ---------- 等宽小标签：杂志里那种「栏目名」的用法 ---------- */
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ============================================================
+     1. 顶部滚动条（ticker）
+     模仿报纸刊头下方的滚动资讯带，用于交代站点状态
+     ============================================================ */
+  .ticker {
+    background: var(--ink);
+    color: var(--paper);
+    height: 34px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .ticker__track {
+    display: flex;
+    gap: 42px;
+    white-space: nowrap;
+    /* 内容复制两份，位移 -50% 时正好接上，形成无缝循环 */
+    animation: ticker-run 36s linear infinite;
+    padding-left: 42px;
+  }
+  .ticker__track span { display: inline-flex; align-items: center; gap: 42px; }
+  /* 每个短语之间的小圆点 */
+  .ticker__track span::after {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  @keyframes ticker-run {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ============================================================
+     2. 导航栏
+     底部一条 3px 粗线，是整页最重要的结构线
+     ============================================================ */
+  .nav {
+    border-bottom: 3px solid var(--ink);
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 50;
+  }
+  .nav__inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 18px var(--gutter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand__cn {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+  .brand__en {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+  .nav__list {
+    display: flex;
+    gap: 32px;
+  }
+  .nav__list a {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .18s, color .18s;
+  }
+  .nav__list a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .nav__cta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    border: 1.5px solid var(--ink);
+    padding: 8px 16px;
+    transition: background .18s, color .18s;
+  }
+  .nav__cta:hover { background: var(--ink); color: var(--paper); }
+
+  /* ============================================================
+     3. 主视觉区
+     核心手法：超大字号 + 数字变色 + 大面积留白
+     ============================================================ */
+  .hero {
+    padding: 72px 0 56px;
+    border-bottom: var(--line);
+  }
+  .hero__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: var(--line);
+    padding-bottom: 14px;
+    margin-bottom: 34px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    /* clamp 让字号随屏幕在 48px 到 104px 之间自动调节 */
+    font-size: clamp(46px, 7.2vw, 104px);
+    /* 行高不能压到 1 以下：中文没有西文那样的上下伸部，
+       行距太小会让两行字视觉上粘在一起 */
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+    margin-bottom: 44px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    /* 数字稍微倾斜一点，破掉整齐感，更有编辑味 */
+    display: inline-block;
+    transform: skewX(-6deg);
+  }
+  .hero h1 .under {
+    /* 手写感的下划线：只覆盖文字底部一小条，像马克笔划过 */
+    background: linear-gradient(transparent 86%, rgba(226, 62, 31, 0.3) 86%);
+  }
+  .hero__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+  .lede {
+    font-size: 18px;
+    line-height: 1.75;
+    max-width: 480px;
+    color: var(--ink-soft);
+  }
+  .lede strong { color: var(--ink); font-weight: 700; }
+
+  /* 右下角的色块卡片：撞色只在这里大面积出现 */
+  .stamp {
+    background: var(--accent);
+    color: #fff;
+    padding: 18px 22px;
+    min-width: 210px;
+    transform: rotate(-1.5deg);   /* 轻微旋转，像盖章 */
+  }
+  .stamp__num {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .stamp__label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    margin-top: 6px;
+    opacity: 0.9;
+  }
+
+  /* ============================================================
+     4. 最新更新（三栏错位）
+     第二栏整体下移，制造杂志内页参差的排版节奏
+     ============================================================ */
+  .section {
+    padding: 64px 0;
+    border-bottom: var(--line);
+  }
+  .section__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 40px;
+  }
+  .section__title {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 3.4vw, 40px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+  .section__more {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 2px;
+  }
+  .section__more:hover { color: var(--accent); border-color: var(--accent); }
+
+  .posts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .post {
+    padding: 26px 28px 30px;
+    border-left: var(--line);
+    transition: background .2s;
+    /* grid 子项默认 min-width 是 auto，内容撑不破就不换行，
+       会导致整个网格比容器宽。设成 0 让内容老实跟着格子走 */
+    min-width: 0;
+  }
+  .post:first-child { border-left: none; padding-left: 0; }
+  .post:nth-child(2) { margin-top: 54px; }   /* 错位的那一格 */
+  .post:hover { background: var(--paper-2); }
+
+  .post__no {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 18px;
+  }
+  .post__cat {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .post__cat--blue { color: var(--accent-2); }
+  .post__cat--ink  { color: var(--ink-soft); }
+  .post__title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    transition: color .18s;
+    /* 中英混排时，长英文单词（Markdown 这类）会顶破容器，
+       break-word 允许它在必要时从词内断开 */
+    overflow-wrap: break-word;
+  }
+  .post:hover .post__title { color: var(--accent); }
+  .post__desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+  .post__meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* ============================================================
+     5. 车间（深色反色区块）
+     整段反色，是页面唯一的大面积撞色，用来隔开内容层级
+     ============================================================ */
+  .workshop {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 72px 0 80px;
+  }
+  .workshop .section__title { color: var(--paper); }
+  .workshop .tag { color: rgba(242, 239, 230, 0.5); }
+  .workshop .section__more {
+    border-color: var(--paper);
+    color: var(--paper);
+  }
+  .workshop .section__more:hover { color: var(--accent); border-color: var(--accent); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .card {
+    /* 用 border 代替背景，hover 时背景才铺满，动效更干净 */
+    border: 1px solid rgba(242, 239, 230, 0.22);
+    padding: 28px 26px 26px;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform .25s, background .25s, border-color .25s;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    background: rgba(242, 239, 230, 0.06);
+    border-color: var(--accent);
+  }
+  .card__no {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .card__name {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .card__desc {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: rgba(242, 239, 230, 0.62);
+  }
+  .card__foot {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(242, 239, 230, 0.5);
+  }
+  .card__foot .arrow { transition: transform .25s; }
+  .card:hover .card__foot .arrow { transform: translateX(6px); color: var(--accent); }
+
+  /* ============================================================
+     6. 数字条
+     四项整数并排，用超大字重压住页面底部
+     ============================================================ */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: var(--line);
+    margin-top: 12px;
+  }
+  /* 数字条和页脚之间需要一段空白，否则粗黑线贴得太近 */
+  .figures-wrap { padding-bottom: 72px; }
+  .figure {
+    padding: 40px 26px;
+    border-left: var(--line);
+  }
+  .figure:first-child { border-left: none; padding-left: 0; }
+  .figure__num {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 4.6vw, 62px);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+  .figure__label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* ============================================================
+     7. 页脚
+     ============================================================ */
+  .footer {
+    padding: 72px 0 40px;
+    border-top: 3px solid var(--ink);
+  }
+  .footer__big {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 5vw, 62px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 26px;
+  }
+  .footer__mail {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 3px;
+    color: var(--accent);
+  }
+  .footer__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: var(--line);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer__row .tag { font-size: 10.5px; }
+
+  /* ============================================================
+     8. 滚动进入动效
+     关键细节：默认状态必须是「可见」的。
+     只有 JS 成功执行、给 <html> 加上 .js 类之后，才启用隐藏加淡入。
+     否则 JS 报错、被拦截、或截图/搜索引擎抓取时，整页内容会空白。
+     ============================================================ */
+  html.js .rise {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  html.js .rise.in { opacity: 1; transform: none; }
+
+  /* ============================================================
+     9. 响应式：窄屏把多栏全部压成一栏
+     ============================================================ */
+  @media (max-width: 900px) {
+    :root { --gutter: 22px; }
+    .nav__list { display: none; }        /* 小屏先隐藏导航，正式版要换成汉堡菜单 */
+    .nav__cta { padding: 7px 11px; font-size: 10px; letter-spacing: 0.08em; }
+    .hero { padding: 44px 0 40px; }
+    /* 小屏字号必须收到 36px 上下：
+       "我试了 137 个工具，" 在 46px 下一行要 400px 以上，会顶出屏幕 */
+    .hero h1 { font-size: clamp(30px, 8.2vw, 50px); }
+    .hero h1 em { transform: none; }      /* 小屏去掉倾斜，省一点宽度 */
+    .hero__bottom { gap: 28px; }
+    .stamp { transform: none; }
+    .section__head { flex-wrap: wrap; gap: 12px; }
+    .posts { grid-template-columns: 1fr; }
+    .post { border-left: none; border-top: var(--line); padding-left: 0; padding-right: 0; }
+    .post:first-child { border-top: none; }
+    .post:nth-child(2) { margin-top: 0; }
+    .cards { grid-template-columns: 1fr; }
+    .figures { grid-template-columns: repeat(2, 1fr); }
+    .figure { border-left: none; border-top: var(--line); padding-left: 0; }
+    .section { padding: 46px 0; }
+  }
+
+  /* 尊重系统「减少动态效果」设置，关掉跑马灯和淡入 */
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__track { animation: none; }
+    .rise { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部状态条 ===== -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <span>本站共 42 条藏品</span><span>每条都写了坑在哪</span><span>工具至少用满三个月才推荐</span><span>每月更新一次</span>
+    <span>本站共 42 条藏品</span><span>每条都写了坑在哪</span><span>工具至少用满三个月才推荐</span><span>每月更新一次</span>
+  </div>
+</div>
+
+<!-- ===== 导航 ===== -->
+<nav class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="#">
+      <span class="brand__cn">杂物间</span>
+      <span class="brand__en">PARTS BIN</span>
+    </a>
+    <ul class="nav__list">
+      <li><a href="#latest">藏品</a></li>
+      <li><a href="#workshop">车间</a></li>
+      <li><a href="#latest">笔记</a></li>
+      <li><a href="#footer">关于</a></li>
+    </ul>
+    <a class="nav__cta" href="#footer">订阅更新</a>
+  </div>
+</nav>
+
+<!-- ===== 主视觉 ===== -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero__top">
+      <span class="tag">前言 / Preface</span>
+      <span class="tag">第 001 期 · 2026 年 10 月</span>
+    </div>
+
+    <h1 class="rise">
+      我试了 <em>137</em> 个工具，<br>
+      只留下 <em>12</em> 个<span class="under">还在用</span>。
+    </h1>
+
+    <div class="hero__bottom rise">
+      <p class="lede">
+        这里不做网址导航。每一条推荐都写清三件事：<strong>它解决什么问题、我用了多久、什么情况下你不该用它</strong>。
+        另外还有一个车间，放我自己写的小工具和小网页。
+      </p>
+      <div class="stamp">
+        <div class="stamp__num">42</div>
+        <div class="stamp__label">条藏品 / 全部经手验证</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 最新更新 ===== -->
+<section class="section" id="latest">
+  <div class="wrap">
+    <div class="section__head rise">
+      <h2 class="section__title">最新</h2>
+      <a class="section__more" href="#">全部 42 条 →</a>
+    </div>
+
+    <div class="posts">
+      <!-- 每条帖子：编号 / 分类 / 标题 / 一句话结论 / 元信息 -->
+      <article class="post rise">
+        <span class="post__no">NO. 042</span>
+        <span class="post__cat">工具</span>
+        <h3 class="post__title">Raycast 之外，我为什么退回了 Alfred</h3>
+        <p class="post__desc">用了 14 个月 Raycast，最后还是回到 Alfred。不是因为功能，是因为它在离线时不会让我卡住两秒。</p>
+        <p class="post__meta">2026.10.11 · 阅读 6 分钟</p>
+      </article>
+
+      <article class="post rise">
+        <span class="post__no">NO. 003</span>
+        <span class="post__cat post__cat--blue">车间</span>
+        <h3 class="post__title">书签导出器：把收藏夹变成 Markdown</h3>
+        <p class="post__desc">纯前端，300 行，不上传任何数据。拖一个 HTML 文件进去，吐一份分好类的 md。</p>
+        <p class="post__meta">2026.10.04 · 可直接使用</p>
+      </article>
+
+      <article class="post rise">
+        <span class="post__no">NO. 018</span>
+        <span class="post__cat post__cat--ink">笔记</span>
+        <h3 class="post__title">我把 80 个软件删到 12 个，剩下的清单</h3>
+        <p class="post__desc">删的标准只有一条：一个月没打开过的，删。留下的是这十二个，附上每个的位置和理由。</p>
+        <p class="post__meta">2026.09.28 · 阅读 11 分钟</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 车间（深色反色区） ===== -->
+<section class="workshop" id="workshop">
+  <div class="wrap">
+    <div class="section__head rise">
+      <div>
+        <span class="tag">车间 / Workshop</span>
+        <h2 class="section__title" style="margin-top:10px">自己做的东西</h2>
+      </div>
+      <a class="section__more" href="#">全部作品 →</a>
+    </div>
+
+    <div class="cards">
+      <a class="card rise" href="#">
+        <div>
+          <div class="card__no">NO. 01</div>
+          <div class="card__name">书签导出器</div>
+          <p class="card__desc">浏览器收藏夹转 Markdown，纯本地处理，文件不出电脑。</p>
+        </div>
+        <div class="card__foot"><span>HTML · 300 行</span><span class="arrow">→</span></div>
+      </a>
+
+      <a class="card rise" href="#">
+        <div>
+          <div class="card__no">NO. 02</div>
+          <div class="card__name">字体配对器</div>
+          <p class="card__desc">输入一段中文，实时预览六组衬线加无衬线的搭配效果。</p>
+        </div>
+        <div class="card__foot"><span>CSS · 可交互</span><span class="arrow">→</span></div>
+      </a>
+
+      <a class="card rise" href="#">
+        <div>
+          <div class="card__no">NO. 03</div>
+          <div class="card__name">年度开销图</div>
+          <p class="card__desc">把一年的订阅账单摊成一张横向时间轴，看清钱花在哪。</p>
+        </div>
+        <div class="card__foot"><span>SVG · 可视化</span><span class="arrow">→</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 数字条 ===== -->
+<div class="wrap figures-wrap">
+  <div class="figures rise">
+    <div class="figure">
+      <div class="figure__num">42</div>
+      <div class="figure__label">条藏品</div>
+    </div>
+    <div class="figure">
+      <div class="figure__num">3</div>
+      <div class="figure__label">个自制工具</div>
+    </div>
+    <div class="figure">
+      <div class="figure__num">18</div>
+      <div class="figure__label">篇笔记</div>
+    </div>
+    <div class="figure">
+      <div class="figure__num">12</div>
+      <div class="figure__label">次更新 / 今年</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 页脚 ===== -->
+<footer class="footer" id="footer">
+  <div class="wrap">
+    <span class="tag">联系 / Contact</span>
+    <h2 class="footer__big rise" style="margin-top:14px">有想让我试的工具？<br>或者，发现了我的错。</h2>
+    <a class="footer__mail" href="mailto:hello@example.com">hello@example.com</a>
+
+    <div class="footer__row">
+      <span class="tag">杂物间 PARTS BIN · 建于 2026</span>
+      <span class="tag">用 Astro 搭建 · 内容全文原创</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ============================================================
+  // 滚动进入动效
+  // 原理：IntersectionObserver 监听每个 .rise 元素，
+  // 只要它进入视口，就加一个 .in 类，CSS 负责把它淡入上移。
+  // 这样比监听 scroll 事件省性能，滚动再快也不卡。
+  // ============================================================
+  (function () {
+    var items = document.querySelectorAll('.rise');
+
+    // 带 ?noanim 参数打开时，完全不做动画
+    // 用途：截图、打印、给别人看静态效果时，避免拍到空白
+    if (location.search.indexOf('noanim') > -1) {
+      items.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+
+    // 浏览器太老、不支持这个 API 时，直接全部显示，不让内容消失
+    if (!('IntersectionObserver' in window)) {
+      items.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+
+    // 确认能力可用之后，才让 CSS 开启「先隐藏再淡入」
+    // 顺序很重要：先判断能力，再加类，避免动画永远等不到触发
+    document.documentElement.classList.add('js');
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          // 显示过一次就不再观察，避免来回滚动反复触发
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.15,                          // 露出 15% 就触发
+      rootMargin: '0px 0px -40px 0px'           // 底部提前 40px 触发，让动效更自然
+    });
+
+    items.forEach(function (el) { observer.observe(el); });
+
+    // 兜底：页面加载完 1 秒后，把所有还没出现的元素强制显示
+    // 为什么需要这一步：如果元素因为任何原因没被观察触发
+    // （极端情况下的渲染时序问题、打印、自动截图），
+    // 内容会永久停在透明状态 —— 那比没有动效糟糕得多。
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        items.forEach(function (el) { el.classList.add('in'); });
+      }, 1000);
+    });
+  })();
+
+  // ============================================================
+  // 卡片逐个延迟出现
+  // 同一组卡片同时淡入会显得呆板，错开 80ms 更像杂志翻页
+  // ============================================================
+  (function () {
+    document.querySelectorAll('.cards .card').forEach(function (card, i) {
+      card.style.transitionDelay = (i * 80) + 'ms';
+    });
+    document.querySelectorAll('.posts .post').forEach(function (post, i) {
+      post.style.transitionDelay = (i * 80) + 'ms';
+    });
+  })();
+</script>
+</body>
+</html>

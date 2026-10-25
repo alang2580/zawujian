@@ -1,0 +1,51 @@
+---
+/**
+ * 404 页
+ * Astro 会把 src/pages/404.astro 输出成 404.html，
+ * 部署到静态托管后遇到不存在的地址会自动用它。
+ */
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="找不到页面" description="这个地址不存在。">
+  <div class="wrap notfound">
+    <span class="tag">404 / Not Found</span>
+    <h1>这一格是空的</h1>
+    <p>地址可能写错了，也可能那条内容我后来删了。</p>
+    <a class="back" href="/">回首页 →</a>
+  </div>
+</Base>
+
+<style>
+  .notfound {
+    min-height: 62vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 60px;
+    padding-bottom: 80px;
+  }
+  .notfound h1 {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 7vw, 88px);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+    margin: 16px 0 18px;
+  }
+  .notfound p {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+  }
+  .back {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    border: 1.5px solid var(--ink);
+    padding: 11px 20px;
+    align-self: flex-start;
+    transition: background 0.18s, color 0.18s;
+  }
+  .back:hover { background: var(--ink); color: var(--paper); }
+</style>

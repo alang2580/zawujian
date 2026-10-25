@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="杂物间">
+  <!-- 墨色底，像一块标签 -->
+  <rect width="32" height="32" fill="#12100E"/>
+  <!-- 箱体轮廓 -->
+  <rect x="6.5" y="11.5" width="19" height="14" fill="none" stroke="#F2EFE6" stroke-width="2"/>
+  <!-- 箱盖：朱红，唯一的颜色 -->
+  <rect x="6.5" y="11.5" width="19" height="4.5" fill="#E23E1F"/>
+</svg>

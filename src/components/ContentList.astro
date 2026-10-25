@@ -1,0 +1,55 @@
+---
+/**
+ * 通用内容网格
+ * 三个列表页（藏品/车间/笔记）共用，保证排布一致。
+ * 只负责摆格子，条目长什么样由 PostCard 决定。
+ */
+import PostCard from './PostCard.astro';
+
+interface Item {
+  href: string;
+  no?: string;
+  category?: string;
+  tone?: 'accent' | 'blue' | 'ink';
+  title: string;
+  summary: string;
+  meta?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="list">
+  {items.map((item, i) => (
+    <PostCard
+      href={item.href}
+      no={item.no ?? `NO.${String(items.length - i).padStart(2, '0')}`}
+      category={item.category}
+      tone={item.tone}
+      title={item.title}
+      summary={item.summary}
+      meta={item.meta}
+    />
+  ))}
+</div>
+
+<style>
+  .list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* 第一行不要上边框，每行第一个不要左边框，否则会和区块线重叠 */
+  .list :global(.post) { border-top: var(--line); }
+  .list :global(.post:nth-child(-n + 3)) { border-top: none; }
+  .list :global(.post:nth-child(3n + 1)) { border-left: none; padding-left: 0; }
+
+  @media (max-width: 900px) {
+    .list { grid-template-columns: 1fr; }
+    .list :global(.post:nth-child(-n + 3)) { border-top: var(--line); }
+    .list :global(.post:first-child) { border-top: none; }
+  }
+</style>

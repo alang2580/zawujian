@@ -1,0 +1,100 @@
+---
+/**
+ * 评论区（Giscus）
+ *
+ * 原理：Giscus 把每条评论存成 GitHub Discussions 里的一条讨论，
+ * 浏览器直接向 giscus.app 请求一个 iframe 渲染出来。
+ * 所以这个站不需要任何服务器、数据库，也没有后台维护成本。
+ *
+ * 代价是：读者要评论必须先登录 GitHub 账号。
+ * 如果以后不能接受这个门槛，换成 Waline（需要自己部署一个免费云函数）。
+ *
+ * 配置四个 ID 的方法写在 src/consts.ts 的注释里。
+ */
+import { GISCUS, isGiscusReady } from '../consts';
+
+const isDev = import.meta.env.DEV;
+---
+
+{
+  isGiscusReady ? (
+    <section class="comments">
+      <div class="comments__head">
+        <span class="tag">评论 / Comments</span>
+        <span class="tag">需 GitHub 账号登录</span>
+      </div>
+      <div class="giscus"></div>
+      <script
+        is:inline
+        src="https://giscus.app/client.js"
+        data-repo={GISCUS.repo}
+        data-repo-id={GISCUS.repoId}
+        data-category={GISCUS.category}
+        data-category-id={GISCUS.categoryId}
+        data-mapping={GISCUS.mapping}
+        data-strict={GISCUS.strict}
+        data-reactions-enabled={GISCUS.reactionsEnabled}
+        data-emit-metadata="0"
+        data-input-position={GISCUS.inputPosition}
+        data-theme="light"
+        data-lang={GISCUS.lang}
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async
+      />
+    </section>
+  ) : isDev ? (
+    <section class="comments">
+      <div class="comments__notice">
+        <strong>评论区还没接上。</strong>
+        <p>
+          去 <a href="https://giscus.app/zh-CN" target="_blank" rel="noopener">giscus.app</a>
+          填一个公开仓库，拿到 repo / repoId / categoryId 三个值，
+          填进 <code>src/consts.ts</code> 的 GISCUS 里就会自动显示。
+          这段提示只在本地开发时出现，正式站点不会显示。
+        </p>
+      </div>
+    </section>
+  ) : null
+}
+
+<style>
+  .comments {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 3px solid var(--ink);
+  }
+  .comments__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .comments__notice {
+    border: 1px dashed rgba(226, 62, 31, 0.5);
+    background: rgba(226, 62, 31, 0.04);
+    padding: 20px 22px;
+    font-family: var(--font-sans, sans-serif);
+  }
+  .comments__notice strong {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .comments__notice p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+  .comments__notice a { color: var(--accent); border-bottom: 1px solid currentColor; }
+  .comments__notice code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: var(--paper-2);
+    padding: 1px 5px;
+  }
+</style>

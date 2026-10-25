@@ -1,0 +1,113 @@
+---
+/**
+ * 顶部导航
+ * 导航项来自 consts.ts 的 NAV 数组，新增板块只改那一个文件。
+ * 当前页面所在的板块会加一条红色下划线。
+ */
+import { SITE, NAV } from '../consts';
+
+const path = Astro.url.pathname;
+
+/** 判断某个导航项是否为当前板块（含其下的详情页） */
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<nav class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="/">
+      <span class="brand__cn">{SITE.name}</span>
+      <span class="brand__en">{SITE.nameEn}</span>
+    </a>
+
+    <ul class="nav__list">
+      {NAV.map((item) => (
+        <li>
+          <a href={item.href} class:list={[{ active: isActive(item.href) }]}>
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <a class="nav__cta" href="/rss.xml">订阅更新</a>
+  </div>
+</nav>
+
+<style>
+  .nav {
+    border-bottom: 3px solid var(--ink);
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 50;
+  }
+  .nav__inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 18px var(--gutter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex: none;
+  }
+  .brand__cn {
+    font-family: var(--font-display);
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+  .brand__en {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+  .nav__list {
+    display: flex;
+    gap: 32px;
+    margin-left: auto;
+  }
+  .nav__list a {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .nav__list a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  /* 当前板块常驻红下划线 */
+  .nav__list a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .nav__cta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    border: 1.5px solid var(--ink);
+    padding: 8px 16px;
+    transition: background 0.18s, color 0.18s;
+    flex: none;
+  }
+  .nav__cta:hover { background: var(--ink); color: var(--paper); }
+
+  @media (max-width: 900px) {
+    .nav__inner { padding: 14px var(--gutter); gap: 12px; }
+    /* 小屏不隐藏导航，否则读者没法翻到别的板块。
+       压缩字号和间距让它挤在一行里；订阅入口收到页脚。 */
+    .nav__list { display: flex; gap: 14px; margin-left: auto; }
+    .nav__list a { font-size: 11px; letter-spacing: 0.06em; padding-bottom: 3px; }
+    .nav__cta { display: none; }
+    .brand__cn { font-size: 21px; }
+    .brand__en { display: none; }
+  }
+  @media (max-width: 380px) {
+    .nav__list { gap: 10px; }
+    .nav__list a { font-size: 10.5px; }
+  }
+</style>

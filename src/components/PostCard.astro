@@ -1,0 +1,94 @@
+---
+/**
+ * 内容卡片
+ * 首页「最新」和各个列表页共用同一个组件，
+ * 保证任何地方的条目长相一致。
+ */
+interface Props {
+  href: string;
+  /** 编号，形如 NO.042，可以不传 */
+  no?: string;
+  /** 分类标签文字，形如「工具」 */
+  category?: string;
+  /** 标签配色 */
+  tone?: 'accent' | 'blue' | 'ink';
+  title: string;
+  summary: string;
+  /** 底部元信息，形如「2026.10.11 · 阅读 6 分钟」 */
+  meta?: string;
+}
+
+const { href, no, category, tone = 'accent', title, summary, meta } = Astro.props;
+---
+
+<article class="post rise">
+  <a href={href}>
+    {no && <span class="post__no">{no}</span>}
+    {category && <span class:list={['post__cat', `post__cat--${tone}`]}>{category}</span>}
+    <h3 class="post__title">{title}</h3>
+    <p class="post__desc">{summary}</p>
+    {meta && <p class="post__meta">{meta}</p>}
+  </a>
+</article>
+
+<style>
+  .post {
+    padding: 26px 28px 30px;
+    border-left: var(--line);
+    transition: background 0.2s;
+    min-width: 0;
+  }
+  .post a { display: block; height: 100%; }
+  .post:hover { background: var(--paper-2); }
+
+  .post__no {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .post__cat {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    margin-bottom: 14px;
+  }
+  .post__cat--accent { color: var(--accent); }
+  .post__cat--blue { color: var(--accent-2); }
+  .post__cat--ink { color: var(--ink-soft); }
+
+  .post__title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    transition: color 0.18s;
+    overflow-wrap: break-word;
+  }
+  .post:hover .post__title { color: var(--accent); }
+
+  .post__desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+  .post__meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 900px) {
+    .post { padding: 24px 0 26px; border-left: none; border-top: var(--line); }
+    .post:first-child { border-top: none; }
+  }
+</style>

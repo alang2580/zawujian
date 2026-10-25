@@ -1,0 +1,83 @@
+---
+/**
+ * 全站骨架布局
+ * 所有页面都套这一层：顶部滚动条 + 导航 + 内容区 + 页脚。
+ */
+import '../styles/global.css';
+import { SITE } from '../consts';
+import Ticker from '../components/Ticker.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  /** 页面标题，会拼在站名前面 */
+  title?: string;
+  /** 页面描述，用于 SEO 和社交分享卡片 */
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} · ${SITE.nameEn}`;
+// 拼出当前页面的完整地址，用于 og:url
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com');
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical.href} />
+
+    <!-- 社交分享卡片 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <Ticker />
+    <Nav />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // ============================================================
+      // 滚动进入动效
+      // 先判断浏览器是否支持，确认可用之后才给 <html> 加 .js 类，
+      // 让 CSS 开启「先隐藏再淡入」。顺序不能反，否则脚本失败时整页空白。
+      // ============================================================
+      const items = document.querySelectorAll('.rise');
+
+      if ('IntersectionObserver' in window) {
+        document.documentElement.classList.add('js');
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('in');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+        );
+
+        items.forEach((el) => observer.observe(el));
+
+        // 兜底：加载完 1 秒后强制显示所有还没出现的元素，
+        // 避免任何时序问题导致内容永久透明
+        window.addEventListener('load', () => {
+          setTimeout(() => items.forEach((el) => el.classList.add('in')), 1000);
+        });
+      }
+    </script>
+  </body>
+</html>

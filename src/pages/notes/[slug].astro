@@ -1,0 +1,110 @@
+---
+/**
+ * 笔记详情页
+ */
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Comments from '../../components/Comments.astro';
+
+export async function getStaticPaths() {
+  const items = await getCollection('notes', ({ data }) => !data.draft);
+  return items.map((item) => ({
+    params: { slug: item.id },
+    props: { item },
+  }));
+}
+
+interface Props {
+  item: CollectionEntry<'notes'>;
+}
+
+const { item } = Astro.props;
+const { Content } = await render(item);
+
+const fmt = (d: Date) =>
+  `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+---
+
+<Base title={item.data.title} description={item.data.summary}>
+  <article>
+    <header class="head">
+      <div class="wrap">
+        <div class="head__top">
+          <span class="tag">笔记 / Note</span>
+          <span class="tag">{fmt(item.data.publishedAt)}</span>
+        </div>
+        <h1>{item.data.title}</h1>
+        <p class="head__summary">{item.data.summary}</p>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="prose body">
+        <Content />
+      </div>
+
+      {item.data.tags.length > 0 && (
+        <div class="tags">
+          {item.data.tags.map((t) => (
+            <span class="tags__item">#{t}</span>
+          ))}
+        </div>
+      )}
+
+      <Comments />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .head {
+    padding: 52px 0 34px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .head__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 22px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .head h1 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 4.4vw, 58px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.12;
+    max-width: 900px;
+  }
+  .head__summary {
+    margin-top: 18px;
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    max-width: 640px;
+  }
+
+  .body { max-width: 720px; padding-top: 44px; }
+
+  .tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+  }
+  .tags__item {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+  }
+
+  @media (max-width: 900px) {
+    .head { padding: 32px 0 24px; }
+    .head__summary { font-size: 15.5px; }
+    .body { padding-top: 30px; }
+  }
+</style>
